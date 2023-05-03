@@ -1,0 +1,88 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PuckScript : MonoBehaviour
+{
+    public Scores ScoresInstance;
+    public static bool Goal { get; private set;}
+    private Rigidbody2D rb;
+    
+    private string StoredTag;
+
+    public float MaxSpeed;
+    
+    [SerializeField]
+    public GameObject Hit;
+    public GameObject PlayerAi;
+    public GameObject PlayerBlue;
+
+    public bool HasHit;
+    public bool PlayerHitBall;
+    public bool AiHitBall;
+    
+    // Start is called before the first frame update
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        Goal = false;
+    }
+
+    
+    //Method for detecting when player or ai has scored a goal, on the basis of a trigger function 
+    private void OnTriggerEnter2D(Collider2D OtherGameObject)
+    {
+        if (!Goal)
+        {
+            if (OtherGameObject.tag == "AiGoal")
+            {
+                ScoresInstance.Increment(Scores.Score.PlayerScore);
+                Goal = true;
+                StartCoroutine(ResetPuck());
+
+            }
+            else if(OtherGameObject.tag == "PlayerGoal")
+            {
+                ScoresInstance.Increment(Scores.Score.AiScore);
+                Goal = true;
+                StartCoroutine(ResetPuck());
+            }
+            
+        }
+    }
+
+  /*   private void OnCollisionEnter2D(Collision2D col)//col = This game object is colliding with the next
+     {
+         if (col.gameObject.tag == "AiPlayer")
+        {
+            if (AiHitBall)
+            {
+                HasHit = true;
+            }
+            else
+            {
+                ScoresInstance.Decrement(Scores.Score.AiScore);
+            }
+        }
+     }*/
+    
+  
+  //Metohd for resetting the Pucks position after 1 second
+    private IEnumerator ResetPuck()
+    {
+        yield return new WaitForSecondsRealtime(1);
+        Goal = false;
+        rb.velocity = rb.position = new Vector2(0, 0);
+    }
+
+    //Central point (spawn point)
+    public void CenterPuck()
+    {
+        rb.position = new Vector2(0, 0);
+    }
+    //rigidbody of Puck, returning copy of the vectors magnitude with minimum value of the pucks velocity and max speed
+    private void FixedUpdate()
+    {
+        rb.velocity = Vector2.ClampMagnitude(rb.velocity, MaxSpeed);
+    }

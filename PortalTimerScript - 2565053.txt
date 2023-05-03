@@ -1,0 +1,54 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PortalTimer : MonoBehaviour
+{
+    public GameObject[] portals;
+
+    public float minAppTime = 5f;
+    public float maxAppTime = 10f;
+    public float appearTime = 15f;
+
+    private bool StartGame = false;
+
+    private Coroutine spawnCoroutine;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        foreach (GameObject portal in portals)
+        {
+            portal.SetActive(true);
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (!StartGame)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                StartGame = true;
+                spawnCoroutine = StartCoroutine(PortalSpawner());
+            }
+
+        }
+    }
+
+    //Spawns portals for every few seconds, and for a specific period of time
+    IEnumerator PortalSpawner()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(Random.Range(minAppTime, maxAppTime));
+
+            int randomIndex = Random.Range(0, portals.Length);
+            portals[randomIndex].SetActive(true);
+
+            yield return new WaitForSeconds(appearTime);
+            portals[randomIndex].SetActive(false);
+        }
+    }
+}

@@ -1,0 +1,106 @@
+using System;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
+using Random = UnityEngine.Random;
+
+[RequireComponent(typeof(Text))]
+public class UIScript : MonoBehaviour
+{
+    [Header("Canvas")]
+    public GameObject CanvasScores;
+    public GameObject RestartMenu;
+    
+    [Header("RestartMenu")]
+    public GameObject WinText;
+    public GameObject LoseText;
+
+    [Header("Start Menu")]
+    public GameObject CanvasStart;
+    public Text CountdownText;
+
+
+    public Scores scoreScript;
+
+    public PuckScript puckScript;
+    public Player1Movement player1Movement;
+    public AiScript aiScript;
+
+    public float timeLeft = 5.0f;
+
+    public GameObject Portals;
+
+    public void Start()
+    {
+        CanvasStart.SetActive(true);
+
+    }
+    
+    public void Update()
+    {
+        timeLeft -= Time.deltaTime;
+        CountdownText.text = timeLeft.ToString("0");
+        if (timeLeft > 0 )
+        {
+            puckScript.enabled = false;
+            aiScript.enabled = false;
+            player1Movement.enabled = false;
+        }
+        else
+        {
+            puckScript.enabled = true;
+            aiScript.enabled = true;
+            player1Movement.enabled = true;
+        }
+
+        if (timeLeft <= 0 )
+        {
+            timeLeft = 0;
+            CountdownText.gameObject.SetActive(false);
+            CanvasStart.gameObject.SetActive(false);
+        }
+
+      
+    }
+
+
+
+    public void ShowRestartMenu(bool didAiWin)
+    {
+        Time.timeScale = 0;
+        
+        CanvasScores.SetActive(false);
+        RestartMenu.SetActive(true);
+        
+        if (didAiWin)
+        {
+           WinText.SetActive(false);
+           LoseText.SetActive(true);  
+        }
+        else
+        {
+            WinText.SetActive(true);
+            LoseText.SetActive(false);
+        }
+       
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1;
+        
+        CanvasScores.SetActive(true);
+        RestartMenu.SetActive(false);
+        
+        scoreScript.ResetscoresAmounts();
+        puckScript.CenterPuck();
+        player1Movement.ResetPaddleStart();
+        aiScript.ResetAiPaddle();
+    }
+
+  
+    
+    
+
+
+}

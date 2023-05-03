@@ -1,0 +1,97 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+
+public class Player1Movement : MonoBehaviour
+{
+    
+   
+    bool MouseClick = true; //Used when player clicks on screen
+    bool PlayerMove; //Whether a player can move or not
+    Vector2 PlayerBlueSize; // Size of Player 1 sprite
+    private Vector2 ResetStartingPosition;
+
+    Rigidbody2D rb1;
+
+    public Transform BoundaryHolder;
+
+    private Boundary playerBoundary;
+    
+
+    
+
+
+    void Start()
+    {
+        //Get the extents - distance from center to edge of PlayerBlue Game Object
+        PlayerBlueSize = GetComponent<SpriteRenderer>().bounds.extents;
+        rb1 = GetComponent<Rigidbody2D>();
+        ResetStartingPosition = rb1.position;
+
+        playerBoundary = new Boundary(BoundaryHolder.GetChild(0).position.y,
+                                    BoundaryHolder.GetChild(1).position.y,
+                                        BoundaryHolder.GetChild(2).position.x,
+                                       BoundaryHolder.GetChild(3).position.x);
+    }
+    
+    void Update()
+    {   
+        //Check if left mouse button is pressed, Mouse button 0 = left mouse button.
+        if (Input.GetMouseButton(0))
+        {   
+            //Mouse position assigned to world co-ordinates system 
+            //Screen coordinates dependent on resolution and differs, world co-ordinates will stay the same 
+
+
+            //In order to move player within the game, we need to operate in world co-ordinates, and not screen co-ordinates so we convet screen to world.
+            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+
+            //check if player clicked on screen
+            if (MouseClick)
+            {
+                MouseClick = false;
+
+
+                //Player has to click on game object in order to move, and not anywhere within the worl
+                //We don't want game object to jump to new positition, only move when clicked on
+                if ((mousePos.x >= transform.position.x && mousePos.x < transform.position.x + PlayerBlueSize.x ||
+                mousePos.x <= transform.position.x && mousePos.x > transform.position.x - PlayerBlueSize.x) &&
+                (mousePos.y >= transform.position.y && mousePos.y < transform.position.y + PlayerBlueSize.y ||
+                mousePos.y <= transform.position.y && mousePos.y > transform.position.y - PlayerBlueSize.y))
+                {
+                    
+                    PlayerMove = true;
+                    
+                }
+                else
+                {
+                    //if the click was somewhere else and not on the Gamebobject, then nothing will happen 
+                    PlayerMove = false;
+                    
+                }
+            }
+
+            if (PlayerMove)
+            {
+                Vector2 clampedMousePos = new Vector2(
+                    Mathf.Clamp(mousePos.x, playerBoundary.Left, playerBoundary.Right),
+                    Mathf.Clamp(mousePos.y, playerBoundary.Down, playerBoundary.Up));
+                rb1.MovePosition(clampedMousePos);
+            }
+            
+        }
+        else
+        {
+           //at the time of the click we want to see if mouse position is inside
+            MouseClick = true;
+        }
+    }
+    
+    public void ResetPaddleStart()
+    {
+        rb1.position = ResetStartingPosition;
+    }
+}
